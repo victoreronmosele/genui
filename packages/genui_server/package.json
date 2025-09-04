@@ -37,7 +37,7 @@
     "node": "^20.19.4",
     "node-fetch": "^3.3.2",
     "opentelemetry": "^0.1.0",
-    "pino": "^9.9.1"
+    "pino": "^9.9.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",
