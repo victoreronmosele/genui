@@ -169,6 +169,8 @@ A `LayoutNode` message is a JSON object with the following keys:
 - `properties`: An object containing the properties for this widget. A property's value can be a static literal (string, number, boolean, etc.) or a binding object.
 - `itemTemplate`: For list-building widgets, this is a complete `LayoutNode` object used as a template. See Section 3.3.
 
+A property is considered a dynamic binding if its value is a JSON object containing a `"$bind"` key. The value of `"$bind"` is the path to the data in the state object. Any other keys in the object are transformations.
+
 ### **3.4. Advanced Composition: List Rendering with Builders**
 
 To efficiently render dynamic lists (e.g., search results), the framework supports a builder pattern. This avoids defining a `LayoutNode` for every single item in a list.
@@ -180,20 +182,20 @@ A special widget type, e.g., `ListViewBuilder`, can be defined in the catalog. I
 - **`itemTemplate`**: It contains a single `LayoutNode` definition that serves as a template for each item. This template can use relative binding paths, which the client resolves for each element of the bound `data` list.
 
 ```json
-// Example: A node for a ListViewBuilder using the $-prefix syntax
+// Example: A node for a ListViewBuilder using the $bind property syntax
 {
   "id": "todo_list",
   "type": "ListViewBuilder",
   "properties": {
     "scrollDirection": "vertical",
-    "$data": "/todoItems"
+    "data": { "$bind": "/todoItems" }
   },
   "itemTemplate": {
     "id": "todo_item_template",
     "type": "ListItem",
     "properties": {
-      "$text": "details/text",
-      "$isCompleted": "isCompleted"
+      "text": { "$bind": "details/text" },
+      "isCompleted": { "$bind": "isCompleted" }
     }
   }
 }
