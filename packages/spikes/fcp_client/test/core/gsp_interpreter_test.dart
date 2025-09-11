@@ -53,6 +53,23 @@ void main() {
     });
 
     testWidgets(
+      'processes multiple Layout messages and merges nodes',
+      (WidgetTester tester) async {
+        streamController.add(
+          '{"messageType": "Layout", "nodes": [{"id": "node1", "type": "Text"}]}',
+        );
+        await tester.pump();
+        streamController.add(
+          '{"messageType": "Layout", "nodes": [{"id": "node2", "type": "Column"}]}',
+        );
+        streamController.add('{"messageType": "LayoutRoot", "rootId": "node1"}');
+        await tester.pump();
+        expect(interpreter.isReadyToRender, isTrue);
+        expect(interpreter.currentLayout!.nodes.length, 2);
+      },
+    );
+
+    testWidgets(
       'processes LayoutRoot and sets isReadyToRender when root is buffered',
       (WidgetTester tester) async {
         streamController.add(
@@ -123,6 +140,34 @@ void main() {
       );
       await tester.pump();
       expect(callCount, 4);
+    });
+
+    testWidgets('handles empty message string gracefully', (
+      WidgetTester tester,
+    ) async {
+      int callCount = 0;
+      interpreter.addListener(() => callCount++);
+      streamController.add('');
+      await tester.pump();
+      expect(callCount, 0);
+    });
+
+    testWidgets('handles malformed JSON gracefully', (
+      WidgetTester tester,
+    ) async {
+      expect(
+        () => interpreter.processMessage('{"messageType": "Layout", "nodes":'),
+        throwsFormatException,
+      );
+    });
+
+    testWidgets('handles unknown message type gracefully', (
+      WidgetTester tester,
+    ) async {
+      expect(
+        () => interpreter.processMessage('{"messageType": "Unknown"}'),
+        throwsFormatException,
+      );
     });
   });
 }
